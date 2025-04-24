@@ -1,0 +1,15 @@
+[package]
+name = "jstw-web"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+axum = "0.8.3"
+tokio = { version = "1.0", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+serde = { version = "1.0", features = ["derive"] }
+rusqlite = { version = "0.35.0", features = ["bundled"] }
+maud = { version = "*", features = ["axum"] }
+r2d2 = "0.8"
+r2d2_sqlite = "0.28"
