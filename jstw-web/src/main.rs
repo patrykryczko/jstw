@@ -5,7 +5,7 @@ mod models;
 mod services;
 mod views;
 
-use std::sync::Arc;
+use std::{env, sync::Arc};
 
 use anyhow::Context;
 use app_error::AppError;
@@ -25,7 +25,16 @@ async fn main() -> Result<(), anyhow::Error> {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
+    dotenvy::dotenv().ok();
+
+    let port = env::var("PORT")
+        .ok()
+        .and_then(|p| p.parse::<u16>().ok())
+        .unwrap_or(3000);
+
+    let bind_addr = format!("127.0.0.1:{}", port);
+
+    let listener = tokio::net::TcpListener::bind(&bind_addr)
         .await
         .context("Failed to bind to 127.0.0.1:3000")?;
 
@@ -35,15 +44,16 @@ async fn main() -> Result<(), anyhow::Error> {
 
     tracing::debug!("listening on {}", addr);
 
-    let app = app().context("Failed to initialize application")?;
+    let database_name = env::var("DATABASE_NAME").unwrap_or_else(|_| "jstw.db".to_string());
+    let app = app(&database_name).context("Failed to initialize application")?;
 
     axum::serve(listener, app).await.context("Server error")?;
 
     Ok(())
 }
 
-fn app() -> Result<Router, AppError> {
-    let manager = SqliteConnectionManager::file("jstw.db");
+fn app(db_name: &str) -> Result<Router, AppError> {
+    let manager = SqliteConnectionManager::file(db_name);
     let pool = Pool::new(manager)?;
 
     let app_state = AppState {
