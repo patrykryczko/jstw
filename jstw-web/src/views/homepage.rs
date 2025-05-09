@@ -1,4 +1,7 @@
-use crate::{app_error::AppError, models::app_state::AppState, services::bookmarks};
+use crate::{
+    app_error::AppError, models::app_state::AppState, services::bookmarks,
+    views::shared::page_header,
+};
 use axum::{
     Form,
     extract::{Path, State},
@@ -11,9 +14,7 @@ pub async fn index(State(state): State<AppState>) -> Result<Markup, AppError> {
 
     let markup = html! {
         html {
-            head {
-                script src="https://unpkg.com/htmx.org@2.0.4" {}
-            }
+            (page_header("jstw"))
             body {
                 h2 { "Bookmarks" }
 

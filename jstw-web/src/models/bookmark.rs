@@ -11,27 +11,3 @@ pub struct Bookmark {
     pub description: Option<String>,
     pub img_url: Option<String>,
 }
-
-impl Bookmark {
-    pub fn new(
-        id: i64,
-        created_at: f64,
-        edited_at: Option<f64>,
-        deleted_at: Option<f64>,
-        url: String,
-        title: Option<String>,
-        description: Option<String>,
-        img_url: Option<String>,
-    ) -> Bookmark {
-        Bookmark {
-            id,
-            created_at,
-            edited_at,
-            deleted_at,
-            url,
-            title,
-            description,
-            img_url,
-        }
-    }
-}
