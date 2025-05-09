@@ -1,4 +1,5 @@
 mod api;
+mod app_error;
 mod db;
 mod models;
 mod services;
@@ -6,6 +7,8 @@ mod views;
 
 use std::sync::Arc;
 
+use anyhow::Context;
+use app_error::AppError;
 use axum::Router;
 use models::app_state::AppState;
 use r2d2::Pool;
@@ -13,7 +16,7 @@ use r2d2_sqlite::SqliteConnectionManager;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), anyhow::Error> {
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env()
@@ -24,26 +27,32 @@ async fn main() {
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
         .await
-        .unwrap();
+        .context("Failed to bind to 127.0.0.1:3000")?;
 
-    tracing::debug!("listening on {}", listener.local_addr().unwrap());
+    let addr = listener
+        .local_addr()
+        .context("Failed to get local address")?;
 
-    let app = app().unwrap();
+    tracing::debug!("listening on {}", addr);
 
-    axum::serve(listener, app).await.unwrap();
+    let app = app().context("Failed to initialize application")?;
+
+    axum::serve(listener, app).await.context("Server error")?;
+
+    Ok(())
 }
 
-fn app() -> Result<Router, rusqlite::Error> {
+fn app() -> Result<Router, AppError> {
     let manager = SqliteConnectionManager::file("jstw.db");
-    let pool = Pool::new(manager).expect("Failed to create pool");
+    let pool = Pool::new(manager)?;
 
     let app_state = AppState {
         db_pool: Arc::new(pool),
     };
 
-    let conn = app_state.db_pool.get().unwrap();
+    let conn = app_state.db_pool.get()?;
 
-    db::init(&conn);
+    db::init(&conn)?;
 
     let api_router = api::router::new();
     let views_router = views::router::new();
