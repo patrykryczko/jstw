@@ -28,7 +28,7 @@ pub fn get_all(conn: &Connection) -> Result<Vec<Bookmark>, AppError> {
     Ok(bookmarks)
 }
 
-pub fn create(conn: &Connection, url: String) -> Result<(), AppError> {
+pub fn create(conn: &Connection, url: &str) -> Result<(), AppError> {
     db::insert_bookmark(conn, &url)?;
 
     Ok(())

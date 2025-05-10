@@ -32,7 +32,7 @@ async fn main() -> Result<(), anyhow::Error> {
         .and_then(|p| p.parse::<u16>().ok())
         .unwrap_or(3000);
 
-    let bind_addr = format!("127.0.0.1:{}", port);
+    let bind_addr = format!("127.0.0.1:{port}");
 
     let listener = tokio::net::TcpListener::bind(&bind_addr)
         .await

@@ -46,10 +46,10 @@ pub async fn add_bookmark(
     form: Form<AddBookmarkForm>,
 ) -> Result<Markup, AppError> {
     let conn = state.db_pool.get()?;
+    bookmarks::create(&conn, &form.url)?;
 
-    bookmarks::create(&conn, form.url.clone())?;
-
-    Ok(bookmarks_list(&conn)?)
+    let markup = bookmarks_list(&conn)?;
+    Ok(markup)
 }
 
 pub async fn delete_bookmark(
@@ -57,14 +57,14 @@ pub async fn delete_bookmark(
     Path(id): Path<i64>,
 ) -> Result<Markup, AppError> {
     let conn = state.db_pool.get()?;
-
     bookmarks::delete(&conn, id)?;
 
-    Ok(bookmarks_list(&conn)?)
+    let markup = bookmarks_list(&conn)?;
+    Ok(markup)
 }
 
 fn bookmarks_list(conn: &Connection) -> Result<Markup, AppError> {
-    let bookmarks = bookmarks::get_all(&conn)?;
+    let bookmarks = bookmarks::get_all(conn)?;
 
     let markup = html! {
         ul id="bookmarks-list" {

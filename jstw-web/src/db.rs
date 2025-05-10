@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS bookmarks (
     title TEXT,
     description TEXT,
     img_url TEXT
-);
+) STRICT;
     ";
 
     conn.execute(query, [])?;
